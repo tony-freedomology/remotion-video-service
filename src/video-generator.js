@@ -35,7 +35,7 @@ export async function generateVideo({ sprintId, dayNumber, videoScript, brandCol
 
     // Get composition details
     const compositionId = 'SprintVideo';
-    const compositions = await selectComposition({
+    const composition = await selectComposition({
       serveUrl: bundleLocation,
       id: compositionId,
       inputProps: {
@@ -46,7 +46,6 @@ export async function generateVideo({ sprintId, dayNumber, videoScript, brandCol
       },
     });
 
-    const composition = compositions[0];
     if (!composition) {
       throw new Error(`Composition "${compositionId}" not found`);
     }
