@@ -1,0 +1,43 @@
+{
+  "name": "remotion-video-service",
+  "version": "1.0.0",
+  "description": "Dedicated video generation service using Remotion for sprint lessons",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "echo 'No build step required'",
+    "test": "echo 'No tests yet'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "axios": "^1.6.2",
+    "@remotion/cli": "^4.0.331",
+    "@remotion/renderer": "^4.0.331",
+    "@remotion/bundler": "^4.0.331",
+    "remotion": "^4.0.331",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "@supabase/supabase-js": "^2.52.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "remotion",
+    "video-generation",
+    "microservice",
+    "sprint-lessons"
+  ],
+  "author": "Sprint Creation Platform",
+  "license": "MIT"
+}
