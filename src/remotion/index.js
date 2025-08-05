@@ -1,5 +1,5 @@
 import React from 'react';
-import { Composition } from 'remotion';
+import { Composition, registerRoot } from 'remotion';
 import { SprintVideo } from './SprintVideo.js';
 
 // Default video configuration
@@ -52,3 +52,6 @@ export const RemotionRoot = () => {
     </>
   );
 };
+
+// Register the root component
+registerRoot(RemotionRoot);
