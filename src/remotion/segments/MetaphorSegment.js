@@ -29,7 +29,7 @@ export const MetaphorSegment = ({ content, brandColors }) => {
   return (
     <AbsoluteFill
       style={{
-        background: 'linear-gradient(135deg, white 0%, #F0FFFF 100%)',
+        background: 'linear-gradient(135deg, white 0%, rgba(34, 223, 220, 0.05) 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -90,7 +90,7 @@ export const MetaphorSegment = ({ content, brandColors }) => {
                 borderRadius: 20,
                 padding: 40,
                 boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08)',
-                border: '2px solid #E0F7FA',
+                border: `2px solid ${brandColors.primary}`,
                 height: 200,
                 display: 'flex',
                 flexDirection: 'column',
@@ -128,7 +128,7 @@ export const MetaphorSegment = ({ content, brandColors }) => {
                 borderRadius: 20,
                 padding: 40,
                 boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08)',
-                border: '2px solid #E0F7FA',
+                border: `2px solid ${brandColors.primary}`,
                 height: 200,
                 display: 'flex',
                 flexDirection: 'column',
@@ -166,7 +166,7 @@ export const MetaphorSegment = ({ content, brandColors }) => {
                 borderRadius: 20,
                 padding: 40,
                 boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08)',
-                border: '2px solid #E0F7FA',
+                border: `2px solid ${brandColors.primary}`,
                 height: 200,
                 display: 'flex',
                 flexDirection: 'column',

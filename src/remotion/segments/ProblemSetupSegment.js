@@ -49,8 +49,7 @@ export const ProblemSetupSegment = ({ content, brandColors }) => {
         background: `
           radial-gradient(circle at ${blob1X}% ${blob1Y}%, rgba(34, 223, 220, 0.15) 0%, transparent 50%),
           radial-gradient(circle at ${blob2X}% ${blob2Y}%, rgba(34, 237, 182, 0.1) 0%, transparent 60%),
-          radial-gradient(circle at ${blob3X}% ${blob3Y}%, rgba(42, 74, 74, 0.8) 0%, transparent 40%),
-          linear-gradient(135deg, ${brandColors.accent} 0%, #2A4A4A 100%)
+          ${brandColors.accent}
         `,
         display: 'flex',
         alignItems: 'center',

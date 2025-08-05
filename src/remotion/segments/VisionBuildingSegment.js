@@ -29,7 +29,7 @@ export const VisionBuildingSegment = ({ content, brandColors }) => {
   return (
     <AbsoluteFill
       style={{
-        background: 'linear-gradient(135deg, white 0%, #F0FFFF 100%)',
+        background: 'linear-gradient(135deg, white 0%, rgba(34, 223, 220, 0.05) 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

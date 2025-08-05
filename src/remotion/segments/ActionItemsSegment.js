@@ -34,7 +34,7 @@ export const ActionItemsSegment = ({ content, brandColors }) => {
   return (
     <AbsoluteFill
       style={{
-        background: 'linear-gradient(135deg, white 0%, #F0FFFF 100%)',
+        background: 'linear-gradient(135deg, white 0%, rgba(34, 223, 220, 0.05) 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -142,7 +142,7 @@ export const ActionItemsSegment = ({ content, brandColors }) => {
               <p
                 style={{
                   fontSize: 18,
-                  color: '#666',
+                  color: brandColors.accent,
                   lineHeight: 1.4,
                   margin: 0,
                 }}
@@ -206,7 +206,7 @@ export const ActionItemsSegment = ({ content, brandColors }) => {
               <p
                 style={{
                   fontSize: 18,
-                  color: '#666',
+                  color: brandColors.accent,
                   lineHeight: 1.4,
                   margin: 0,
                 }}
@@ -270,7 +270,7 @@ export const ActionItemsSegment = ({ content, brandColors }) => {
               <p
                 style={{
                   fontSize: 18,
-                  color: '#666',
+                  color: brandColors.accent,
                   lineHeight: 1.4,
                   margin: 0,
                 }}
@@ -334,7 +334,7 @@ export const ActionItemsSegment = ({ content, brandColors }) => {
               <p
                 style={{
                   fontSize: 18,
-                  color: '#666',
+                  color: brandColors.accent,
                   lineHeight: 1.4,
                   margin: 0,
                 }}

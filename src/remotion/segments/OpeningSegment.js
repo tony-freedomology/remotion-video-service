@@ -42,7 +42,7 @@ export const OpeningSegment = ({ content, brandColors }) => {
         background: `
           radial-gradient(circle at ${blob1X}% ${blob1Y}%, rgba(34, 223, 220, 0.12) 0%, transparent 60%),
           radial-gradient(circle at ${blob2X}% ${blob2Y}%, rgba(34, 237, 182, 0.08) 0%, transparent 50%),
-          linear-gradient(135deg, ${brandColors.accent} 0%, #2A4A4A 100%)
+          ${brandColors.accent}
         `,
         display: 'flex',
         flexDirection: 'column',
