@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import { generateVideo } from './video-generator.js';
 import { supabase } from './supabase-client.js';
 
+// In-memory job tracking (in production, use Redis or database)
+const jobs = new Map();
+
 // Load environment variables
 dotenv.config();
 
@@ -25,7 +28,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Main video generation endpoint
+// Main video generation endpoint (async)
 app.post('/generate-video', async (req, res) => {
   try {
     const { sprintId, dayNumber, videoScript, brandColors } = req.body;
@@ -38,19 +41,24 @@ app.post('/generate-video', async (req, res) => {
       });
     }
 
-    console.log(`🎬 Starting video generation for Sprint ${sprintId}, Day ${dayNumber}`);
+    // Generate unique job ID
+    const jobId = `video-job-${sprintId}-${dayNumber}-${Date.now()}`;
+    
+    console.log(`🎬 Starting async video generation: ${jobId}`);
     console.log(`📝 Script: "${videoScript.title}" with ${videoScript.segments.length} segments`);
 
-    // Set timeout for long-running video generation
-    const timeout = setTimeout(() => {
-      res.status(408).json({
-        success: false,
-        error: 'Video generation timed out'
-      });
-    }, 15 * 60 * 1000); // 15 minutes
+    // Initialize job status
+    jobs.set(jobId, {
+      status: 'processing',
+      sprintId,
+      dayNumber,
+      startTime: new Date().toISOString(),
+      estimatedTime: 300, // 5 minutes estimate
+      progress: 0
+    });
 
-    // Generate the video
-    const result = await generateVideo({
+    // Start async video generation (don't await)
+    generateVideoAsync(jobId, {
       sprintId,
       dayNumber,
       videoScript,
@@ -61,17 +69,13 @@ app.post('/generate-video', async (req, res) => {
       }
     });
 
-    clearTimeout(timeout);
-
-    console.log(`✅ Video generation complete: ${result.videoUrl}`);
-
+    // Return job ID immediately
     res.json({
       success: true,
-      videoUrl: result.videoUrl,
-      fileName: result.fileName,
-      duration: result.duration,
-      fileSize: result.fileSize,
-      message: 'Video generated successfully'
+      jobId: jobId,
+      status: 'processing',
+      estimatedTime: 300,
+      message: 'Video generation started. Use the job ID to check progress.'
     });
 
   } catch (error) {
@@ -79,11 +83,47 @@ app.post('/generate-video', async (req, res) => {
     
     res.status(500).json({
       success: false,
-      error: error.message || 'Video generation failed',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: error.message || 'Video generation failed'
     });
   }
 });
+
+// Async video generation function
+async function generateVideoAsync(jobId, params) {
+  try {
+    console.log(`🔄 Processing job ${jobId}...`);
+    
+    // Update progress
+    jobs.set(jobId, { ...jobs.get(jobId), progress: 10 });
+
+    const result = await generateVideo(params);
+    
+    console.log(`✅ Job ${jobId} complete: ${result.videoUrl}`);
+
+    // Update job status with results
+    jobs.set(jobId, {
+      ...jobs.get(jobId),
+      status: 'completed',
+      progress: 100,
+      videoUrl: result.videoUrl,
+      fileName: result.fileName,
+      duration: result.duration,
+      fileSize: result.fileSize,
+      completedAt: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error(`❌ Job ${jobId} failed:`, error);
+    
+    // Update job status with error
+    jobs.set(jobId, {
+      ...jobs.get(jobId),
+      status: 'failed',
+      error: error.message,
+      completedAt: new Date().toISOString()
+    });
+  }
+}
 
 // Bulk video generation endpoint (for multiple days)
 app.post('/generate-videos-bulk', async (req, res) => {
@@ -150,6 +190,51 @@ app.post('/generate-videos-bulk', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Bulk video generation failed'
+    });
+  }
+});
+
+// Job status endpoint (for checking async processing progress)
+app.get('/job-status/:jobId', (req, res) => {
+  try {
+    const { jobId } = req.params;
+    
+    const job = jobs.get(jobId);
+    
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        error: 'Job not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      jobId: jobId,
+      status: job.status,
+      progress: job.progress,
+      sprintId: job.sprintId,
+      dayNumber: job.dayNumber,
+      startTime: job.startTime,
+      estimatedTime: job.estimatedTime,
+      ...(job.status === 'completed' && {
+        videoUrl: job.videoUrl,
+        fileName: job.fileName,
+        duration: job.duration,
+        fileSize: job.fileSize,
+        completedAt: job.completedAt
+      }),
+      ...(job.status === 'failed' && {
+        error: job.error,
+        completedAt: job.completedAt
+      })
+    });
+
+  } catch (error) {
+    console.error('❌ Job status check error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check job status'
     });
   }
 });
@@ -222,6 +307,7 @@ app.use('*', (req, res) => {
       'GET /health',
       'POST /generate-video',
       'POST /generate-videos-bulk',
+      'GET /job-status/:jobId',
       'GET /video-status/:sprintId/:dayNumber'
     ]
   });
@@ -232,6 +318,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Remotion Video Service running on port ${PORT}`);
   console.log(`🏥 Health check: http://localhost:${PORT}/health`);
   console.log(`🎬 Video generation: http://localhost:${PORT}/generate-video`);
+  console.log(`🔍 Job status: http://localhost:${PORT}/job-status/:jobId`);
 });
 
 export default app;

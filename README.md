@@ -42,7 +42,7 @@ npm start
 GET /health
 ```
 
-### Generate Single Video
+### Generate Single Video (Async)
 ```
 POST /generate-video
 
@@ -62,6 +62,47 @@ Body:
     "secondary": "#22EDB6", 
     "accent": "#242424"
   }
+}
+
+Response:
+{
+  "success": true,
+  "jobId": "video-job-sprint_123-1-1733445678901",
+  "status": "processing",
+  "estimatedTime": 300,
+  "message": "Video generation started. Use the job ID to check progress."
+}
+```
+
+### Check Job Status
+```
+GET /job-status/:jobId
+
+Response (Processing):
+{
+  "success": true,
+  "jobId": "video-job-sprint_123-1-1733445678901",
+  "status": "processing",
+  "progress": 45,
+  "sprintId": "sprint_123",
+  "dayNumber": 1,
+  "startTime": "2024-12-06T10:15:00.000Z",
+  "estimatedTime": 300
+}
+
+Response (Completed):
+{
+  "success": true,
+  "jobId": "video-job-sprint_123-1-1733445678901", 
+  "status": "completed",
+  "progress": 100,
+  "sprintId": "sprint_123",
+  "dayNumber": 1,
+  "videoUrl": "https://supabase-url/video.mp4",
+  "fileName": "sprint_123/day-1.mp4",
+  "duration": 330,
+  "fileSize": 45678901,
+  "completedAt": "2024-12-06T10:20:00.000Z"
 }
 ```
 
@@ -130,14 +171,17 @@ src/
 5. **Add environment variables** in Render dashboard
 6. **Deploy!**
 
-## 📝 Video Generation Process
+## 📝 Video Generation Process (Async)
 
 1. **Receive request** with script and audio URL
-2. **Download audio** from Supabase storage
-3. **Bundle Remotion** composition with segments
-4. **Render video** with brand styling and animations
-5. **Upload MP4** to Supabase storage
-6. **Return public URL**
+2. **Generate job ID** and return immediately
+3. **Start background processing**:
+   - Download audio from Supabase storage
+   - Bundle Remotion composition with segments
+   - Render video with brand styling and animations
+   - Upload MP4 to Supabase storage
+4. **Update job status** with progress and results
+5. **Client polls** `/job-status/:jobId` for completion
 
 ## 🔧 Configuration
 
@@ -167,18 +211,35 @@ Each segment type has its own visual design:
 
 ## 🔗 Integration
 
-Update your main app's Edge Function to call this service:
+Update your main app's Edge Function to call this async service:
 
 ```typescript
-// In your Supabase Edge Function
+// In your Supabase Edge Function - Start video generation
 const response = await fetch('https://your-render-service.com/generate-video', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ sprintId, dayNumber, videoScript, brandColors })
 });
 
-const result = await response.json();
-return result.videoUrl;
+const { jobId } = await response.json();
+
+// Poll for completion
+const pollForCompletion = async (jobId) => {
+  const statusResponse = await fetch(`https://your-render-service.com/job-status/${jobId}`);
+  const status = await statusResponse.json();
+  
+  if (status.status === 'completed') {
+    return status.videoUrl;
+  } else if (status.status === 'failed') {
+    throw new Error(status.error);
+  } else {
+    // Still processing, check again in 10 seconds
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    return pollForCompletion(jobId);
+  }
+};
+
+return await pollForCompletion(jobId);
 ```
 
 ## 📊 Monitoring
